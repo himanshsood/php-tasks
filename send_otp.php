@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail->Port = 587;                  // TCP port to connect to
 
         // Recipients
-        $mail->setFrom('harshita@orientaloutsourcing.com', 'Mailer');
+        $mail->setFrom('harshita@orientaloutsourcing.com', 'Oriental Outsourcing');
         $mail->addAddress($email);                 // Add a recipient
 
         // Content

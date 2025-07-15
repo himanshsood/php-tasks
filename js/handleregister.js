@@ -1,5 +1,6 @@
+//this code only runs when the page has loaded
 $(document).ready(function() {
-    // Clear error messages
+    // Clear error messages, warnings, bootstrap msgs
     function clearErrors() {
         $('.error-message').text('');
         $('.form-control').removeClass('is-invalid is-valid');
@@ -7,8 +8,9 @@ $(document).ready(function() {
     }
 
     // Show field error
+    // Displays an error message under a specific input.
     function showFieldError(fieldId, message) {
-        $('#' + fieldId + '-error').text(message);
+        $('#' + fieldId + '-error'). text(message);
         $('#' + fieldId).addClass('is-invalid');
     }
 
@@ -109,10 +111,9 @@ $(document).ready(function() {
     }
 
     // Loading state
+    //PREVENTS RESUBMISSIONS
     function showLoading() {
         $('#registerBtn').prop('disabled', true);
-        $('#btnText').text('Creating Account...');
-        $('#btnSpinner').removeClass('d-none');
         $('#loader').css('display', 'flex');
     }
 
@@ -145,7 +146,7 @@ $(document).ready(function() {
             type: 'POST',
             data: formData,
             dataType: 'json',
-            timeout: 30000,
+            timeout: 10000,
             success: function(response) {
                 if (response.success) {
                     showAlert(response.message, 'success');
@@ -193,64 +194,5 @@ $(document).ready(function() {
     });
 
     // Real-time validation
-    $('#firstName, #lastName').on('input', function() {
-        const value = $(this).val().trim();
-        if (value && isValidName(value)) {
-            $(this).removeClass('is-invalid').addClass('is-valid');
-            $('#' + $(this).attr('id') + '-error').text('');
-        } else if (value) {
-            $(this).removeClass('is-valid');
-        } else {
-            $(this).removeClass('is-valid is-invalid');
-        }
-    });
-
-    $('#email').on('input', function() {
-        const email = $(this).val().trim();
-        if (email && isValidEmail(email)) {
-            $(this).removeClass('is-invalid').addClass('is-valid');
-            $('#email-error').text('');
-        } else if (email) {
-            $(this).removeClass('is-valid');
-        } else {
-            $(this).removeClass('is-valid is-invalid');
-        }
-    });
-
-    $('#password').on('input', function() {
-        const password = $(this).val();
-        if (password && isValidPassword(password)) {
-            $(this).removeClass('is-invalid').addClass('is-valid');
-            $('#password-error').text('');
-        } else if (password) {
-            $(this).removeClass('is-valid');
-        } else {
-            $(this).removeClass('is-valid is-invalid');
-        }
-        
-        // Re-validate confirm password
-        const confirmPassword = $('#confirmPassword').val();
-        if (confirmPassword) {
-            if (password === confirmPassword) {
-                $('#confirmPassword').removeClass('is-invalid').addClass('is-valid');
-                $('#confirmPassword-error').text('');
-            } else {
-                $('#confirmPassword').removeClass('is-valid');
-            }
-        }
-    });
-
-    $('#confirmPassword').on('input', function() {
-        const password = $('#password').val();
-        const confirmPassword = $(this).val();
-        
-        if (confirmPassword && password === confirmPassword) {
-            $(this).removeClass('is-invalid').addClass('is-valid');
-            $('#confirmPassword-error').text('');
-        } else if (confirmPassword) {
-            $(this).removeClass('is-valid');
-        } else {
-            $(this).removeClass('is-valid is-invalid');
-        }
-    });
+    
 });

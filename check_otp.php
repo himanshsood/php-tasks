@@ -1,4 +1,5 @@
 <?php
+
 include_once(__DIR__ . '/config.php');
 
 header('Content-Type: application/json');
@@ -12,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo json_encode($response);
         exit;
     }
-    
+
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $otp = isset($_POST['otp']) ? trim($_POST['otp']) : '';
 
@@ -38,8 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit;
     }
 
-       // Check if OTP is set in session
-       if (!isset($_SESSION['forgot_password_otp']) || !isset($_SESSION['otp_email'])) {
+    // Check if OTP is set in session
+    if (!isset($_SESSION['forgot_password_otp']) || !isset($_SESSION['otp_email'])) {
         http_response_code(400);
         $response['error'] = 'OTP not set or session expired.';
         echo json_encode($response);
@@ -71,11 +72,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Optionally, clear OTP data from session
     unset($_SESSION['forgot_password_otp']);
     unset($_SESSION['otp_email']);
- 
-
 } else {
     http_response_code(405);
     $response['error'] = 'Invalid request method.';
     echo json_encode($response);
 }
-?>

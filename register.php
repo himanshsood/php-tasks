@@ -1,11 +1,8 @@
 <?php
+$PAGE_TITLE = "Register";
 include_once(__DIR__ . '/header.php');
 
-// FIXED: Only start session if not already started
-// if (session_status() === PHP_SESSION_NONE) {
-//     session_start();
-// }
-
+//if csrf token not present make a new one
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -15,52 +12,14 @@ if (empty($_SESSION['csrf_token'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Your Website</title>
+    <title>Register</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875em;
-            margin-top: 0.25rem;
-        }
-        .form-container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 30px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            border-radius: 8px;
-        }
-        #loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            backdrop-filter: blur(8px);
-            background-color: rgba(0, 0, 0, 0.3);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .loader-spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #ffffff;
-            border-top: 6px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .required {
-            color: red;
-        }
-    </style>
+    <link rel="stylesheet" href="./styles/register.css">
+    
 </head>
 <body>
+
+    <!-- loader hidden by default, shows when user submits form  -->
     <div id="loader">
         <div class="loader-spinner"></div>
     </div>
@@ -73,9 +32,15 @@ if (empty($_SESSION['csrf_token'])) {
                 <p class="text-muted mb-4">Join us today! Please fill in the details below to create your account.</p>
             </div>
             <div class="col-md-6">
+
+                <!-- warning which comes at top of form  -->
                 <div id="alert-container"></div>
                 
+                <!-- novalidate - Tells browser not to show its own validation bubbles. -->
                 <form id="registrationForm" novalidate>
+                    
+
+                    <!-- csrf token -->
                     <input type="hidden" id="csrf_token" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 
                     <div class="mb-3">
@@ -111,6 +76,8 @@ if (empty($_SESSION['csrf_token'])) {
                     
                     <button type="submit" class="btn btn-primary" id="registerBtn">
                         <span id="btnText">Create Account</span>
+
+                        <!-- loader -->
                         <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </span>
@@ -124,8 +91,6 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./js/handleregister.js"></script>
 </body>
 </html>

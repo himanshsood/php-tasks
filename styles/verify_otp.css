@@ -1,0 +1,95 @@
+.error-message {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .loader-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid #ffffff;
+            border-top: 6px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .otp-input {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            margin: 0 5px;
+            font-weight: bold;
+        }
+        .otp-input:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        .otp-input.is-invalid {
+            border-color: #dc3545;
+        }
+        .otp-input.is-valid {
+            border-color: #198754;
+        }
+        .otp-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: #dc3545;
+            text-align: center;
+            margin: 15px 0;
+        }
+        .timer.warning {
+            color: #fd7e14;
+        }
+        .timer.normal {
+            color: #198754;
+        }
+        .resend-btn {
+            background: none;
+            border: none;
+            color: #0d6efd;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .resend-btn:hover {
+            color: #0a58ca;
+        }
+        .resend-btn:disabled {
+            color: #6c757d;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+        .verification-icon {
+            font-size: 64px;
+            color: #0d6efd;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .masked-email {
+            font-weight: bold;
+            color: #198754;
+        }

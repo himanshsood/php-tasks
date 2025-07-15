@@ -1,6 +1,8 @@
-<?php 
+<?php
 $PAGE_TITLE = "Contact Us";
-include_once(__DIR__ . '/header.php'); 
+include_once(__DIR__ . '/header.php');
+include_once(__DIR__ . '/includes/loader.php');
+
 // Generate a CSRF token if one does not exist
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -159,35 +161,7 @@ $csrf_token = $_SESSION['csrf_token'];
             }
         });
 
-        function showLoading() {
-            // Show overlay
-            $('#loadingOverlay').css('display', 'flex');
-            
-            // Disable form elements
-            $('#contactForm input, #contactForm textarea, #contactForm button').prop('disabled', true);
-            
-            // Show button loader
-            $('#submitText').hide();
-            $('#formLoader').show();
-            
-            // Disable submit button
-            $('#submitBtn').prop('disabled', true);
-        }
-
-        function hideLoading() {
-            // Hide overlay
-            $('#loadingOverlay').hide();
-            
-            // Enable form elements
-            $('#contactForm input, #contactForm textarea, #contactForm button').prop('disabled', false);
-            
-            // Hide button loader
-            $('#submitText').show();
-            $('#formLoader').hide();
-            
-            // Enable submit button
-            $('#submitBtn').prop('disabled', false);
-        }
+        
 
         function validateEmail(email) {
             var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

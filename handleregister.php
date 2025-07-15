@@ -1,4 +1,5 @@
 <?php
+
 require_once 'config.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -15,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 header('Content-Type: application/json');
 
 // CSRF Token validation
-if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || 
+if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) ||
     !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Invalid CSRF token. Please reload the page and try again.']);
@@ -31,10 +32,10 @@ try {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirmPassword'] ?? '';
-    
+
     // Server-side validation
     $errors = validateFormData($firstName, $lastName, $email, $password, $confirmPassword);
-    
+
     if (!empty($errors)) {
         $response['success'] = false;
         $response['message'] = 'Please fix the errors and try again';
@@ -42,16 +43,16 @@ try {
         echo json_encode($response);
         exit;
     }
-    
+
     // Check if email already exists
     $checkEmailStmt = $conn->prepare("SELECT id, is_email_verified FROM users_info WHERE email = ?");
     $checkEmailStmt->bind_param("s", $email);
     $checkEmailStmt->execute();
     $result = $checkEmailStmt->get_result();
-    
+
     if ($result->num_rows > 0) {
         $existingUser = $result->fetch_assoc();
-        
+
         if ($existingUser['is_email_verified'] == 1) {
             $response['success'] = false;
             $response['message'] = 'Email already registered and verified. Please login or use a different email address.';
@@ -66,43 +67,42 @@ try {
         }
     }
     $checkEmailStmt->close();
-    
+
     // Hash password and insert user
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    
+
     $insertStmt = $conn->prepare("INSERT INTO users_info (first_name, last_name, email, password, is_email_verified, created_at) VALUES (?, ?, ?, ?, 0, NOW())");
     $insertStmt->bind_param("ssss", $firstName, $lastName, $email, $hashedPassword);
-    
+
     if ($insertStmt->execute()) {
         $userId = $conn->insert_id;
         $otp = sprintf("%06d", mt_rand(100000, 999999));
-        
+
         // Save session data
         $_SESSION['temp_user_id'] = $userId;
         $_SESSION['temp_otp'] = $otp;
         $_SESSION['temp_email'] = $email;
         $_SESSION['temp_name'] = $firstName . ' ' . $lastName;
         $_SESSION['otp_expiry'] = time() + 300; // 5 minutes
-        
+
         // Send OTP email
         $emailResult = sendOTPEmail($email, $otp);
-        
+
         if ($emailResult['sent']) {
             $response['success'] = true;
             $response['message'] = 'Registration successful! Please check your email for the OTP verification code.';
             $response['redirect'] = 'verify_otp.php';
         } else {
-            $response['success'] = true;
-            $response['message'] = 'Registration successful! Your OTP is: ' . $otp . ' (Email failed to send)';
-            $response['redirect'] = 'verify_otp.php';
+            $response['success'] = false;
+            $response['message'] = 'Error: We could not send the OTP email. Please try again later.';
         }
     } else {
         throw new Exception('Error inserting user data');
     }
-    
+
     $insertStmt->close();
     $conn->close();
-    
+
 } catch (Exception $e) {
     $response['success'] = false;
     $response['message'] = 'Registration failed. Please try again.';
@@ -111,9 +111,10 @@ try {
 
 echo json_encode($response);
 
-function validateFormData($firstName, $lastName, $email, $password, $confirmPassword) {
+function validateFormData($firstName, $lastName, $email, $password, $confirmPassword)
+{
     $errors = array();
-    
+
     // Validate First Name
     if (empty($firstName)) {
         $errors['firstName'] = 'First name is required';
@@ -122,7 +123,7 @@ function validateFormData($firstName, $lastName, $email, $password, $confirmPass
     } elseif (!preg_match('/^[a-zA-Z\s]+$/', $firstName)) {
         $errors['firstName'] = 'First name can only contain letters and spaces';
     }
-    
+
     // Validate Last Name
     if (empty($lastName)) {
         $errors['lastName'] = 'Last name is required';
@@ -131,7 +132,7 @@ function validateFormData($firstName, $lastName, $email, $password, $confirmPass
     } elseif (!preg_match('/^[a-zA-Z\s]+$/', $lastName)) {
         $errors['lastName'] = 'Last name can only contain letters and spaces';
     }
-    
+
     // Validate Email
     if (empty($email)) {
         $errors['email'] = 'Email address is required';
@@ -140,7 +141,7 @@ function validateFormData($firstName, $lastName, $email, $password, $confirmPass
     } elseif (strlen($email) > 255) {
         $errors['email'] = 'Email address is too long';
     }
-    
+
     // Validate Password
     if (empty($password)) {
         $errors['password'] = 'Password is required';
@@ -155,28 +156,26 @@ function validateFormData($firstName, $lastName, $email, $password, $confirmPass
     } elseif (!preg_match('/[\W_]/', $password)) {
         $errors['password'] = 'Password must include at least one special character';
     }
-    
+
     // Validate Confirm Password
     if (empty($confirmPassword)) {
         $errors['confirmPassword'] = 'Please confirm your password';
     } elseif ($password !== $confirmPassword) {
         $errors['confirmPassword'] = 'Passwords do not match';
     }
-    
+
     return $errors;
 }
 
-function sendOTPEmail($email, $otp) {
+function sendOTPEmail($email, $otp)
+{
     $result = ['sent' => false, 'error' => ''];
-    
+
     // Try different autoload paths
     $autoloadPaths = [
-        __DIR__ . '/vendor/autoload.php',
-        __DIR__ . '/../vendor/autoload.php',
         'vendor/autoload.php',
-        '../vendor/autoload.php'
     ];
-    
+
     $autoloadFound = false;
     foreach ($autoloadPaths as $path) {
         if (file_exists($path)) {
@@ -185,24 +184,24 @@ function sendOTPEmail($email, $otp) {
             break;
         }
     }
-    
+
     if (!$autoloadFound) {
         $result['error'] = 'PHPMailer not found';
         return $result;
     }
-    
+
     try {
         $mail = new PHPMailer(true);
-        
+
         // Server settings
-        $mail->isSMTP(); 
+        $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'himanshsood311@gmail.com';
         $mail->Password = 'zkrj euwx dfnl tdwy';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        
+
         $mail->SMTPOptions = array(
             'ssl' => array(
                 'verify_peer' => false,
@@ -210,16 +209,16 @@ function sendOTPEmail($email, $otp) {
                 'allow_self_signed' => true
             )
         );
-        
+
         // Recipients
         $mail->setFrom('himanshsood311@gmail.com', 'Oriental Outsourcing');
         $mail->addAddress($email);
         $mail->addReplyTo('himanshsood311@gmail.com', 'Oriental Outsourcing');
-        
+
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Welcome! Please verify your email address';
-        
+
         $mail->Body = '
         <!DOCTYPE html>
         <html>
@@ -242,17 +241,16 @@ function sendOTPEmail($email, $otp) {
             </div>
         </body>
         </html>';
-        
+
         $mail->AltBody = "Welcome to Oriental Outsourcing!\n\nYour email verification OTP is: $otp\n\nThis OTP is valid for 5 minutes only.\n\nIf you did not create this account, please ignore this email.";
-        
+
         $mail->send();
         $result['sent'] = true;
-        
+
     } catch (Exception $e) {
         $result['error'] = $e->getMessage();
         error_log("Email Error: " . $e->getMessage());
     }
-    
+
     return $result;
 }
-?>

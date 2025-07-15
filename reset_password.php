@@ -70,7 +70,9 @@ $csrf_token = $_SESSION['csrf_token'];
             <p class="mt-3">Enter a new and strong password.</p>
             <form id="forgotPasswordForm" class="mb-5">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
-                <input type="hidden" id="email" name="email" value="<?php if (isset($_GET['email'])) echo htmlspecialchars($_GET['email']); ?>">
+                <input type="hidden" id="email" name="email" value="<?php if (isset($_GET['email'])) {
+                    echo htmlspecialchars($_GET['email']);
+                } ?>">
                 
                 <div class="form-group">
                     <label for="new_password">New Password <span class="text-danger">*</span></label>

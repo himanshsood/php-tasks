@@ -1,4 +1,5 @@
 <?php
+
 // Include configuration file
 include_once(__DIR__ . "/config.php");
 
@@ -7,7 +8,7 @@ $_SESSION = array();
 
 // Delete the session cookie if it exists
 if (isset($_COOKIE[session_name()])) {
-    setcookie(session_name(), '', time()-3600, '/');
+    setcookie(session_name(), '', time() - 3600, '/');
 }
 
 // Destroy the session
@@ -23,4 +24,3 @@ if ($conn) {
 // Redirect to login page with success message
 header("Location: login.php?logout=success");
 exit();
-?>

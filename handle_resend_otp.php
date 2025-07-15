@@ -1,9 +1,11 @@
 <?php
+
 // Prevent any output before headers
 ob_start();
 
 // Error handling - catch any PHP errors and convert to JSON
-function handleError($errno, $errstr, $errfile, $errline) {
+function handleError($errno, $errstr, $errfile, $errline)
+{
     ob_clean();
     header('Content-Type: application/json');
     echo json_encode([
@@ -14,7 +16,8 @@ function handleError($errno, $errstr, $errfile, $errline) {
     exit;
 }
 
-function handleException($exception) {
+function handleException($exception)
+{
     ob_clean();
     header('Content-Type: application/json');
     echo json_encode([
@@ -74,7 +77,7 @@ try {
         echo json_encode($response);
         exit;
     }
-    
+
     // Rate limiting - check if user is trying to resend too frequently
     if (isset($_SESSION['last_resend_time']) && (time() - $_SESSION['last_resend_time']) < 60) {
         $response['success'] = false;
@@ -83,18 +86,18 @@ try {
         echo json_encode($response);
         exit;
     }
-    
+
     // Generate new OTP
     $newOTP = sprintf("%06d", mt_rand(100000, 999999));
-    
+
     // Update session with new OTP and expiry
     $_SESSION['temp_otp'] = $newOTP;
     $_SESSION['otp_expiry'] = time() + 300; // 5 minutes from now
     $_SESSION['last_resend_time'] = time();
-    
+
     // Send new OTP email
     $emailResult = sendOTPEmail($_SESSION['temp_email'], $newOTP);
-    
+
     if ($emailResult['sent']) {
         $response['success'] = true;
         $response['message'] = 'New OTP has been sent to your email address.';
@@ -103,7 +106,7 @@ try {
         $response['message'] = 'Failed to send OTP. Your new OTP is: ' . $newOTP . ' (Email error: ' . $emailResult['error'] . ')';
         $response['debug'] = $emailResult['error'];
     }
-    
+
 } catch (Exception $e) {
     $response['success'] = false;
     $response['message'] = 'Failed to resend OTP. Please try again.';
@@ -114,17 +117,15 @@ try {
 ob_clean();
 echo json_encode($response);
 
-function sendOTPEmail($email, $otp) {
+function sendOTPEmail($email, $otp)
+{
     $result = ['sent' => false, 'error' => ''];
-    
+
     // Try different autoload paths
     $autoloadPaths = [
-        __DIR__ . '/vendor/autoload.php',
-        __DIR__ . '/../vendor/autoload.php',
         'vendor/autoload.php',
-        '../vendor/autoload.php'
     ];
-    
+
     $autoloadFound = false;
     foreach ($autoloadPaths as $path) {
         if (file_exists($path)) {
@@ -133,19 +134,19 @@ function sendOTPEmail($email, $otp) {
             break;
         }
     }
-    
+
     if (!$autoloadFound) {
         $result['error'] = 'PHPMailer not found. Please run: composer require phpmailer/phpmailer';
         return $result;
     }
-    
+
     try {
         $mail = new PHPMailer(true);
-        
+
         // Enable SMTP debugging (set to 0 to disable)
         $mail->SMTPDebug = 0; // Change to 2 for detailed debugging
         $mail->Debugoutput = 'error_log';
-        
+
         // Server settings
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
@@ -154,7 +155,7 @@ function sendOTPEmail($email, $otp) {
         $mail->Password = 'zkrj euwx dfnl tdwy'; // App password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = 587;
-        
+
         // Additional SMTP settings for Gmail
         $mail->SMTPOptions = array(
             'ssl' => array(
@@ -163,16 +164,16 @@ function sendOTPEmail($email, $otp) {
                 'allow_self_signed' => true
             )
         );
-        
+
         // Recipients
         $mail->setFrom('himanshsood311@gmail.com', 'Oriental Outsourcing');
         $mail->addAddress($email);
         $mail->addReplyTo('himanshsood311@gmail.com', 'Oriental Outsourcing');
-        
+
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Email Verification - Your New OTP Code';
-        
+
         // Enhanced HTML email template
         $mail->Body = '
         <!DOCTYPE html>
@@ -197,18 +198,17 @@ function sendOTPEmail($email, $otp) {
             </div>
         </body>
         </html>';
-        
+
         // Plain text version
         $mail->AltBody = "Your new OTP for email verification is: $otp\n\nThis OTP is valid for 5 minutes only.\n\nIf you did not request this OTP, please ignore this email.";
-        
+
         $mail->send();
         $result['sent'] = true;
-        
+
     } catch (Exception $e) {
         $result['error'] = $e->getMessage();
         error_log("Email Error: " . $e->getMessage());
     }
-    
+
     return $result;
 }
-?>

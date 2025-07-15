@@ -1,6 +1,7 @@
 <?php
 $PAGE_TITLE = "Forgot Password";
 include_once(__DIR__ . "/header.php");
+include_once(__DIR__ . '/includes/loader.php');
 
 // Generate a CSRF token if one does not exist
 if (empty($_SESSION['csrf_token'])) {
@@ -102,6 +103,7 @@ $csrf_token = $_SESSION['csrf_token'];
             isValid = false;
         }
 
+        showLoading()
         if (isValid) {
             $.ajax({
                 url: 'send_otp.php', // Replace with your actual AJAX endpoint
@@ -136,7 +138,11 @@ $csrf_token = $_SESSION['csrf_token'];
                 },
                 error: function() {
                     $('#responseMessage').html('<div class="alert alert-danger">There was an error processing your request. Please try again later.</div>');
+                },
+                complete: function() {
+                    hideLoading();
                 }
+
             });
         }
     });

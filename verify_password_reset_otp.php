@@ -22,93 +22,7 @@ $userEmail = $_SESSION['otp_email'] ?? '';
     <title>Verify OTP - Password Reset</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875em;
-            margin-top: 0.25rem;
-        }
-        .success-message {
-            color: #198754;
-            font-size: 0.875em;
-            margin-top: 0.25rem;
-        }
-        .form-container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 30px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            border-radius: 8px;
-        }
-        #loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            backdrop-filter: blur(8px);
-            background-color: rgba(0, 0, 0, 0.3);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .loader-spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #ffffff;
-            border-top: 6px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .required {
-            color: red;
-        }
-        .otp-input {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-            text-align: center;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            margin: 0 5px;
-            font-weight: bold;
-        }
-        .otp-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-        .otp-input.is-invalid {
-            border-color: #dc3545;
-        }
-        .otp-input.is-valid {
-            border-color: #198754;
-        }
-        .otp-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .verification-icon {
-            font-size: 64px;
-            color: #0d6efd;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .masked-email {
-            font-weight: bold;
-            color: #198754;
-        }
-        .card {
-            border: none;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="./styles/verify_password_reset_otp.css">
 </head>
 <body>
     <div id="loader">
@@ -166,8 +80,7 @@ $userEmail = $_SESSION['otp_email'] ?? '';
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+ 
     <script>
         $(document).ready(function() {
             setupOTPInputs();

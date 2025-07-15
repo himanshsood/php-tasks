@@ -1,4 +1,5 @@
 <?php
+
 include_once(__DIR__ . '/config.php');
 require 'vendor/autoload.php'; // Load Composer's autoloader
 use PHPMailer\PHPMailer\PHPMailer;
@@ -15,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo json_encode($response);
         exit;
     }
-    
+
     $name = isset($_POST['name']) ? trim($_POST['name']) : '';
     $email = isset($_POST['email']) ? trim($_POST['email']) : '';
     $message = isset($_POST['message']) ? trim($_POST['message']) : '';
@@ -69,13 +70,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     try {
         // Server settingS
-        
+
         // Enable SMTP debugging (set to 0 to disable)
         $mail->SMTPDebug = 0; // Change to 2 for detailed debugging
         $mail->Debugoutput = 'error_log';
-        
+
         // Server settings
-        $mail->isSMTP(); 
+        $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
         $mail->Username = 'himanshsood311@gmail.com';
@@ -117,4 +118,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $response['error'] = 'Invalid request method.';
     echo json_encode($response);
 }
-?>

@@ -1,169 +1,37 @@
 <?php
 include_once(__DIR__ . '/header.php');
 
-// Uncomment and fix session validation
+// Session validation
 if (!isset($_SESSION['temp_user_id']) || !isset($_SESSION['temp_otp']) || !isset($_SESSION['temp_email'])) {
     header('Location: register.php?error=session_expired');
     exit;
 }
 
-// Check if OTP has expired
-// c:\Users\sgtech\Downloads\verify_password_reset_otp.php
-
+// Generate CSRF token if not exists
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-$userEmail = $_SESSION['temp_email'] ?? '';
-$userName = $_SESSION['temp_name'] ?? '';
+$userEmail = $_SESSION['temp_email'];
 
-// Fix time calculation - ensure it's always positive
+// Calculate time left
 $timeLeft = 0;
 if (isset($_SESSION['otp_expiry'])) {
-    $timeLeft = $_SESSION['otp_expiry'] - time();
-    if ($timeLeft < 0) {
-        $timeLeft = 0;
-    }
+    $timeLeft = max(0, $_SESSION['otp_expiry'] - time());
 } else {
-    // If no expiry set, set it to 5 minutes from now
     $_SESSION['otp_expiry'] = time() + 300;
     $timeLeft = 300;
 }
-
-// Debug information (remove in production)
-error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . ", Expiry: " . ($_SESSION['otp_expiry'] ?? 'not set'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify OTP - Your Website</title>
+    <title>Verify OTP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875em;
-            margin-top: 0.25rem;
-        }
-        .success-message {
-            color: #198754;
-            font-size: 0.875em;
-            margin-top: 0.25rem;
-        }
-        .form-container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 30px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            border-radius: 8px;
-        }
-        #loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            backdrop-filter: blur(8px);
-            background-color: rgba(0, 0, 0, 0.3);
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .loader-spinner {
-            width: 60px;
-            height: 60px;
-            border: 6px solid #ffffff;
-            border-top: 6px solid transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .required {
-            color: red;
-        }
-        .otp-input {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-            text-align: center;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            margin: 0 5px;
-            font-weight: bold;
-        }
-        .otp-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-        .otp-input.is-invalid {
-            border-color: #dc3545;
-        }
-        .otp-input.is-valid {
-            border-color: #198754;
-        }
-        .otp-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .timer {
-            font-size: 18px;
-            font-weight: bold;
-            color: #dc3545;
-            text-align: center;
-            margin: 15px 0;
-        }
-        .timer.warning {
-            color: #fd7e14;
-        }
-        .timer.normal {
-            color: #198754;
-        }
-        .resend-section {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .resend-btn {
-            background: none;
-            border: none;
-            color: #0d6efd;
-            text-decoration: underline;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .resend-btn:hover {
-            color: #0a58ca;
-        }
-        .resend-btn:disabled {
-            color: #6c757d;
-            cursor: not-allowed;
-            text-decoration: none;
-        }
-        .verification-icon {
-            font-size: 64px;
-            color: #0d6efd;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .masked-email {
-            font-weight: bold;
-            color: #198754;
-        }
-        .debug-info {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="./styles/verify_otp.css">
 </head>
 <body>
     <div id="loader">
@@ -180,17 +48,6 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                 <p class="text-muted mb-3">We've sent a verification code to:</p>
                 <p class="masked-email mb-3"><?php echo htmlspecialchars($userEmail); ?></p>
                 <p class="text-muted">Please enter the 6-digit code to complete your registration.</p>
-                
-                <?php if (isset($_GET['debug'])): ?>
-                <div class="debug-info">
-                    <strong>Debug Info:</strong><br>
-                    Time Left: <?php echo $timeLeft; ?>s<br>
-                    Current Time: <?php echo time(); ?><br>
-                    Expiry Time: <?php echo $_SESSION['otp_expiry'] ?? 'Not set'; ?><br>
-                    User ID: <?php echo $_SESSION['temp_user_id'] ?? 'Not set'; ?><br>
-                    OTP: <?php echo $_SESSION['temp_otp'] ?? 'Not set'; ?>
-                </div>
-                <?php endif; ?>
             </div>
             <div class="col-md-6">
                 <div id="alert-container"></div>
@@ -199,7 +56,7 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                     <input type="hidden" id="csrf_token" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                     
                     <div class="mb-3">
-                        <label class="form-label text-center w-100">Enter 6-Digit Code <span class="required">*</span></label>
+                        <label class="form-label text-center w-100">Enter 6-Digit Code <span class="text-danger">*</span></label>
                         <div class="otp-container">
                             <input type="text" class="form-control otp-input" id="otp1" name="otp1" maxlength="1" required>
                             <input type="text" class="form-control otp-input" id="otp2" name="otp2" maxlength="1" required>
@@ -226,7 +83,7 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                         </span>
                     </button>
                     
-                    <div class="resend-section">
+                    <div class="text-center mt-3">
                         <p class="text-muted mb-2">Didn't receive the code?</p>
                         <button type="button" class="resend-btn" id="resendBtn">
                             <i class="fas fa-redo me-1"></i>Resend Code
@@ -243,8 +100,7 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         let timeLeft = <?php echo $timeLeft; ?>;
         let timerInterval;
@@ -252,20 +108,15 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
         let resendInterval;
         
         $(document).ready(function() {
-            console.log('Initial time left:', timeLeft);
-            
             if (timeLeft > 0) {
                 startTimer();
                 $('#verifyBtn').prop('disabled', false);
             } else {
                 $('#timer').html('<span class="text-danger">Code expired! Please request a new one.</span>');
                 $('#verifyBtn').prop('disabled', true);
-                $('#resendBtn').prop('disabled', false);
             }
             
             setupOTPInputs();
-            
-            // Auto-focus first input
             $('#otp1').focus();
         });
         
@@ -273,7 +124,6 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
             if (timeLeft <= 0) {
                 $('#timer').html('<span class="text-danger">Code expired! Please request a new one.</span>');
                 $('#verifyBtn').prop('disabled', true);
-                $('#resendBtn').prop('disabled', false);
                 return;
             }
             
@@ -285,7 +135,6 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                     clearInterval(timerInterval);
                     $('#timer').html('<span class="text-danger">Code expired! Please request a new one.</span>');
                     $('#verifyBtn').prop('disabled', true);
-                    $('#resendBtn').prop('disabled', false);
                 } else if (timeLeft <= 60) {
                     $('#timer').removeClass('normal').addClass('warning');
                 } else {
@@ -298,24 +147,20 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
             $('.otp-input').on('input', function() {
                 let value = $(this).val();
                 
-                // Only allow numbers
                 if (!/^\d$/.test(value)) {
                     $(this).val('');
                     return;
                 }
                 
-                // Move to next input
                 let nextInput = $(this).next('.otp-input');
                 if (nextInput.length > 0) {
                     nextInput.focus();
                 }
                 
-                // Check if all inputs are filled
                 checkOTPComplete();
             });
             
             $('.otp-input').on('keydown', function(e) {
-                // Handle backspace
                 if (e.key === 'Backspace' && $(this).val() === '') {
                     let prevInput = $(this).prev('.otp-input');
                     if (prevInput.length > 0) {
@@ -323,7 +168,6 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                     }
                 }
                 
-                // Handle paste
                 if (e.ctrlKey && e.key === 'v') {
                     e.preventDefault();
                     handlePaste();
@@ -394,7 +238,6 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
         $('#otpForm').on('submit', function(e) {
             e.preventDefault();
             
-            // Check if timer has expired
             if (timeLeft <= 0) {
                 showAlert('OTP has expired. Please request a new one.', 'danger');
                 return;
@@ -419,8 +262,6 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                 dataType: 'json',
                 timeout: 30000,
                 success: function(response) {
-                    console.log('Response:', response);
-                    
                     if (response.success) {
                         showAlert(response.message, 'success');
                         setTimeout(() => {
@@ -434,7 +275,6 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                             clearOTPInputs();
                         }
                         
-                        // If session expired, redirect to registration
                         if (response.redirect) {
                             setTimeout(() => {
                                 window.location.href = response.redirect;
@@ -443,9 +283,6 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('AJAX Error:', error);
-                    console.error('Response:', xhr.responseText);
-                    
                     let message = 'An error occurred. Please try again.';
                     if (status === 'timeout') {
                         message = 'Request timed out. Please try again.';
@@ -477,20 +314,17 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                 },
                 dataType: 'json',
                 success: function(response) {
-                    console.log('Resend response:', response);
-                    
                     if (response.success) {
                         showAlert(response.message, 'success');
-                        timeLeft = 300; // Reset timer to 5 minutes
+                        timeLeft = 300;
                         clearInterval(timerInterval);
-                        $('#timer').removeClass('warning').addClass('normal');
+                        $('#timer').removeClass('warning').addClass('normal').html('Time remaining: <span id="time-left">300</span>s');
                         $('#verifyBtn').prop('disabled', false);
                         startTimer();
                         clearOTPInputs();
                     } else {
                         showAlert(response.message, 'danger');
                         
-                        // If session expired, redirect to registration
                         if (response.redirect) {
                             setTimeout(() => {
                                 window.location.href = response.redirect;
@@ -499,12 +333,10 @@ error_log("OTP Debug - Time left: " . $timeLeft . ", Current time: " . time() . 
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Resend error:', error);
                     showAlert('Failed to resend code. Please try again.', 'danger');
                 }
             });
             
-            // Start resend cooldown
             resendInterval = setInterval(function() {
                 resendCooldown--;
                 $('#resendBtn').html(`<i class="fas fa-redo me-1"></i>Resend Code (${resendCooldown}s)`);
