@@ -10,19 +10,6 @@ if (empty($_SESSION['csrf_token'])) {
 $csrf_token = $_SESSION['csrf_token'];
 ?>
 
-<!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; display: none; justify-content: center; align-items: center;">
-    <div class="loading-spinner" style="background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-        <div class="mt-3">
-            <h5>Sending your message...</h5>
-            <p class="text-muted">Please wait while we process your request</p>
-        </div>
-    </div>
-</div>
-
 <div class="container mt-5">
     <div class="row">
         <!-- Left Column -->
@@ -73,18 +60,6 @@ $csrf_token = $_SESSION['csrf_token'];
     </div>
 </div>
 
-<style>
-    .btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    
-    .form-loader .spinner-border {
-        width: 1.2rem;
-        height: 1.2rem;
-    }
-</style>
-
 <script>
     $(document).ready(function() {
         $('#contactForm').on('submit', function(event) {
@@ -134,7 +109,7 @@ $csrf_token = $_SESSION['csrf_token'];
             if (isValid) {
                 // Show loading state
                 showLoading();
-                
+
                 $.ajax({
                     url: 'save_contact_ajax.php',
                     type: 'POST',
@@ -149,19 +124,19 @@ $csrf_token = $_SESSION['csrf_token'];
                     error: function(xhr, status, error) {
                         hideLoading();
                         var errorMessage = 'There was an error sending your message. Please try again later.';
-                        
+
                         // Try to get specific error message from response
                         if (xhr.responseJSON && xhr.responseJSON.error) {
                             errorMessage = xhr.responseJSON.error;
                         }
-                        
+
                         $('#responseMessage').html('<div class="alert alert-danger">' + errorMessage + '</div>');
                     }
                 });
             }
         });
 
-        
+
 
         function validateEmail(email) {
             var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
