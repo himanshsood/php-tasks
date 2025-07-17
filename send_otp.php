@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (empty($email)) {
         http_response_code(400);
-        $response['error'] = 'Email is required.';
+        $response['error'] = 'Email not found.';
         echo json_encode($response);
         exit;
     }
@@ -39,7 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($result->num_rows === 0) {
         http_response_code(400);
-        $response['error'] = 'Email not found.';
+        $response['error'] = 'Email is not registered.';
         echo json_encode($response);
         exit;
     }

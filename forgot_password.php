@@ -91,8 +91,17 @@ $csrf_token = $_SESSION['csrf_token'];
                             $('#responseMessage').html('<div class="alert alert-danger">' + response.error + '</div>');
                         }
                     },
-                    error: function() {
-                        $('#responseMessage').html('<div class="alert alert-danger">There was an error processing your request. Please try again later.</div>');
+                    error: function(xhr) {
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.error) {
+                                $('#responseMessage').html('<div class="alert alert-danger">' + response.error + '</div>');
+                            } else {
+                                $('#responseMessage').html('<div class="alert alert-danger">There was an error processing your request. Please try again later.</div>');
+                            }
+                        } catch (e) {
+                            $('#responseMessage').html('<div class="alert alert-danger">There was an error processing your request. Please try again later.</div>');
+                        }
                     },
                     complete: function() {
                         hideLoading();

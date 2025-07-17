@@ -1,5 +1,7 @@
 <?php
 $PAGE_TITLE = "Reset Password";
+$EXTRA_STYLES = '<link rel="stylesheet" href="./styles/reset_password.css">';
+
 include_once(__DIR__ . "/header.php");
 
 // Generate a CSRF token if one does not exist
@@ -8,57 +10,6 @@ if (empty($_SESSION['csrf_token'])) {
 }
 $csrf_token = $_SESSION['csrf_token'];
 ?>
-
-<style>
-    .container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
-
-    .card {
-        width: 500px;
-        margin: auto;
-        padding: 0 2rem;
-        border-radius: 1rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        background-color: white;
-    }
-
-    .card-title {
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
-
-    .btn-primary {
-        background-color: #007bff;
-        border: none;
-        border-radius: 2rem;
-        padding: 0.5rem 2rem;
-        font-size: 1rem;
-    }
-
-    .text-primary {
-        color: #007bff !important;
-    }
-
-    .text-primary:hover {
-        text-decoration: underline;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .text-center {
-        margin-top: 1rem;
-    }
-
-    .text-danger {
-        color: #dc3545;
-    }
-</style>
 
 <div class="container mt-4">
     <div class="mt-5 justify-content-center">

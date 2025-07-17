@@ -1,6 +1,7 @@
 <?php
 
 include_once(__DIR__ . '/config.php');
+
 require 'vendor/autoload.php'; // Load Composer's autoloader
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;

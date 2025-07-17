@@ -1,5 +1,7 @@
 <?php
-
+require 'vendor/autoload.php'; // Load Composer's autoloader
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 // Prevent any output before headers
 ob_start();
 
@@ -31,8 +33,7 @@ function handleException($exception)
 set_error_handler('handleError');
 set_exception_handler('handleException');
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+
 
 // if (session_status() === PHP_SESSION_NONE) {
 //     session_start();

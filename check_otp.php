@@ -58,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if OTP matches
     if ($_SESSION['forgot_password_otp'] != $otp) {
         http_response_code(400);
-        $response['error'] = 'Invalid OTP.';
+        $response['error'] = 'The OTP you entered is incorrect or has expired. Please try again.';
         echo json_encode($response);
         exit;
     }

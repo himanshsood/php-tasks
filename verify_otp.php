@@ -1,5 +1,7 @@
 <?php
+$EXTRA_STYLES = '<link rel="stylesheet" href="./styles/verify_otp.css">';
 include_once(__DIR__ . '/header.php');
+
 
 // Session validation
 if (!isset($_SESSION['temp_user_id']) || !isset($_SESSION['temp_otp']) || !isset($_SESSION['temp_email'])) {
@@ -23,17 +25,7 @@ if (isset($_SESSION['otp_expiry'])) {
     $timeLeft = 300;
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify OTP</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="./styles/verify_otp.css">
-</head>
-<body>
+
     <div id="loader">
         <div class="loader-spinner"></div>
     </div>
@@ -348,5 +340,3 @@ if (isset($_SESSION['otp_expiry'])) {
             }, 1000);
         });
     </script>
-</body>
-</html>
